@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<!--
+╔══════════════════════════════════════════════════════════════════════════╗
+║          PANDUAN SETUP GOOGLE SHEETS LEADERBOARD GLOBAL                ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║                                                                          ║
+║  LANGKAH 1: BUAT GOOGLE SHEET                                            ║
+║  ─────────────────────────────                                           ║
+║  1. Buka https://sheets.google.com                                       ║
+║  2. Klik "+ Spreadsheet baru"                                            ║
+║  3. Beri nama: "Leaderboard Matriks"                                     ║
+║  4. Di baris pertama (A1), isi header:                                   ║
+║     A1: Nama  |  B1: Skor  |  C1: Tanggal                               ║
+║                                                                          ║
+║  LANGKAH 2: BUKA APPS SCRIPT                                             ║
+║  ────────────────────────────                                            ║
+║  1. Di Google Sheets, klik menu: Ekstensi > Apps Script                  ║
+║  2. Hapus semua kode yang ada                                            ║
+║  3. Copy-paste kode LENGKAP di bawah ini:                                ║
+║                                                                          ║
+║  ─────── KODE APPS SCRIPT (COPY MULAI DARI SINI) ──────────────────     ║
+║                                                                          ║
+║  const SHEET_NAME = "Sheet1";                                            ║
+║                                                                          ║
+║  function doGet(e) {                                                     ║
+║    const sheet = SpreadsheetApp                                          ║
+║      .getActiveSpreadsheet()                                             ║
+║      .getSheetByName(SHEET_NAME);                                        ║
+║    const data = sheet.getDataRange().getValues();                        ║
+║    const rows = data.slice(1).map(r => ({                                ║
+║      nama: r[0], skor: r[1], tanggal: r[2]                              ║
+║    }));                                                                  ║
+║    rows.sort((a,b) => b.skor - a.skor);                                 ║
+║    const top10 = rows.slice(0, 10);                                      ║
+║    return ContentService                                                  ║
+║      .createTextOutput(JSON.stringify({ status:"ok", data: top10 }))     ║
+║      .setMimeType(ContentService.MimeType.JSON);                         ║
+║  }                                                                       ║
+║                                                                          ║
+║  function doPost(e) {                                                    ║
+║    try {                                                                 ║
+║      const body = JSON.parse(e.postData.contents);                       ║
+║      const sheet = SpreadsheetApp                                        ║
+║        .getActiveSpreadsheet()                                           ║
+║        .getSheetByName(SHEET_NAME);                                      ║
+║      const now = new Date().toLocaleDateString("id-ID");                 ║
+║      sheet.appendRow([body.nama, body.skor, now]);                       ║
+║      return ContentService                                               ║
+║        .createTextOutput(JSON.stringify({ status:"ok" }))                ║
+║        .setMimeType(ContentService.MimeType.JSON);                       ║
+║    } catch(err) {                                                        ║
+║      return ContentService                                               ║
+║        .createTextOutput(JSON.stringify({ status:"error",                ║
+║          msg: err.toString() }))                                         ║
+║        .setMimeType(ContentService.MimeType.JSON);                       ║
+║    }                                                                     ║
+║  }                                                                       ║
+║                                                                          ║
+║  ─────── KODE APPS SCRIPT SELESAI ────────────────────────────────      ║
+║                                                                          ║
+║  LANGKAH 3: DEPLOY SEBAGAI WEB APP                                       ║
+║  ──────────────────────────────────                                      ║
+║  1. Klik tombol "Deploy" > "New deployment"                              ║
+║  2. Klik ikon ⚙️ di samping "Select type" > pilih "Web app"             ║
+║  3. Isi deskripsi: "Leaderboard Matriks"                                 ║
+║  4. Execute as: "Me (email kamu)"                                        ║
+║  5. Who has access: "Anyone" ← PENTING!                                  ║
+║  6. Klik "Deploy"                                                        ║
+║  7. Izinkan akses saat diminta (klik Advanced > lanjutkan)               ║
+║  8. COPY URL yang muncul (format: https://script.google.com/macros/...)  ║
+║                                                                          ║
+║  LANGKAH 4: PASANG URL KE HALAMAN INI                                    ║
+║  ────────────────────────────────────                                    ║
+║  1. Di halaman web ini, klik ikon ⚙️ (Settings) di pojok                ║
+║  2. Atau cari variabel APPS_SCRIPT_URL di bawah                         ║
+║  3. Ganti "PASTE_YOUR_APPS_SCRIPT_URL_HERE" dengan URL tadi              ║
+║  4. Simpan file & buka ulang                                             ║
+║                                                                          ║
+║  ✅ Selesai! Leaderboard global sudah aktif!                              ║
+╚══════════════════════════════════════════════════════════════════════════╝
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MatriksKu — Belajar Matriks Seru</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* =================== CSS VARIABLES =================== */
+:root {
+  --bg: #0f0f14;
+  --bg2: #16161e;
+  --bg3: #1e1e2a;
+  --card: #1a1a24;
+  --card2: #22223a;
+  --border: #2a2a3d;
+  --text: #e8e8f0;
+  --text2: #9898b8;
+  --accent: #7c3aed;
+  --accent2: #a855f7;
+  --accent3: #c084fc;
+  --green: #10b981;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --radius: 16px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+[data-theme="light"] {
+  --bg: #f0f0f8;
+  --bg2: #e8e8f4;
+  --bg3: #ddddf0;
+  --card: #ffffff;
+  --card2: #f5f5fc;
+  --border: #c8c8e0;
+  --text: #1a1a2e;
+  --text2: #6666aa;
+  --accent: #7c3aed;
+  --accent2: #9333ea;
+  --accent3: #7c3aed;
+  --shadow: 0 8px 32px rgba(124,58,237,0.12);
+}
+
+/* =================== RESET & BASE =================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* =================== SCROLLBAR =================== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+/* =================== HEADER =================== */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(12px);
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--accent2), var(--accent3));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo i { font-size: 1.2rem; -webkit-text-fill-color: var(--accent2); }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.score-badge {
+  background: var(--accent);
+  color: white; padding: 6px 16px; border-radius: 999px;
+  font-weight: 600; font-size: 0.9rem;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* =================== THEME TOGGLE =================== */
+.toggle-wrap { display: flex; align-items: center; gap: 8px; }
+.toggle-wrap label { font-size: 0.8rem; color: var(--text2); }
+.switch { position: relative; width: 46px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer;
+  inset: 0; background: var(--border); border-radius: 999px;
+  transition: 0.3s;
+}
+.slider::before {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; left: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: 0.3s;
+}
+input:checked + .slider { background: var(--accent); }
+input:checked + .slider::before { transform: translateX(20px); }
+
+/* =================== LAYOUT =================== */
+.main-container {
+  max-width: 1300px; margin: 0 auto; padding: 24px 20px;
+}
+.nav-tabs {
+  display: flex; gap: 8px; margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 10px 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text2);
+  border-radius: 999px; cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+  font-weight: 500; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.tab-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+.tab-btn.active {
+  background: var(--accent); border-color: var(--accent);
+  color: white;
+}
+
+/* =================== SECTIONS =================== */
+.section { display: none; }
+.section.active { display: block; }
+
+/* =================== MATERI GRID =================== */
+.materi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+.materi-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative; overflow: hidden;
+}
+.materi-card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%; background: var(--accent2);
+}
+.materi-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.materi-card h3 {
+  font-family: 'Syne', sans-serif; font-size: 1.1rem;
+  margin-bottom: 14px; color: var(--accent3);
+  display: flex; align-items: center; gap: 10px;
+}
+.materi-card p, .materi-card li { color: var(--text2); font-size: 0.93rem; margin-bottom: 8px; }
+.materi-card ul { list-style: none; padding-left: 0; }
+.materi-card ul li::before { content: '▸ '; color: var(--accent2); }
+
+.matrix-visual {
+  display: inline-flex; flex-direction: column;
+  background: var(--bg3); border-radius: 10px;
+  padding: 12px 20px; margin: 10px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
+  border: 1px solid var(--border);
+  position: relative;
+}
+.matrix-visual::before, .matrix-visual::after {
+  content: ''; position: absolute;
+  top: 4px; bottom: 4px; width: 3px;
+  border-radius: 2px; background: var(--accent2);
+}
+.matrix-visual::before { left: 6px; }
+.matrix-visual::after { right: 6px; }
+.matrix-row { display: flex; gap: 16px; justify-content: center; padding: 2px 0; }
+.matrix-cell { min-width: 28px; text-align: center; color: var(--text); }
+.matrix-cell.highlight { color: var(--accent3); font-weight: 700; }
+
+.formula-box {
+  background: var(--bg3); border: 1px dashed var(--border);
+  border-radius: 10px; padding: 14px 18px; margin: 10px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--accent3); line-height: 2;
+}
+.tag-jenis {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 600; margin: 3px 3px 3px 0;
+  background: var(--accent); color: white;
+}
+
+/* =================== GAME SECTION =================== */
+.game-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } }
+
+.question-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px;
+  min-height: 280px;
+}
+.question-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.question-tag {
+  background: var(--accent); color: white;
+  padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+}
+.question-text {
+  font-size: 1.05rem; color: var(--text); margin-bottom: 20px;
+  line-height: 1.8;
+}
+.question-text .math-inline {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg3); padding: 2px 8px; border-radius: 6px;
+  color: var(--accent3);
+}
+
+.answer-area { display: flex; gap: 10px; margin-bottom: 16px; }
+.answer-input {
+  flex: 1; padding: 12px 16px;
+  background: var(--bg3); border: 2px solid var(--border);
+  color: var(--text); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 1rem;
+  outline: none; transition: border-color 0.2s;
+}
+.answer-input:focus { border-color: var(--accent2); }
+.answer-input.correct { border-color: var(--green); animation: pulse-green 0.4s; }
+.answer-input.wrong { border-color: var(--red); animation: shake 0.4s; }
+
+.btn {
+  padding: 12px 20px; border: none; border-radius: 10px;
+  cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-secondary { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+.btn-danger { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
+.btn-danger:hover { background: var(--red); color: white; }
+.btn-success { background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
+.btn-success:hover { background: var(--green); color: white; }
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.explanation-box {
+  background: #1a0a0a; border: 1px solid #7f1d1d;
+  border-radius: 10px; padding: 16px;
+  color: #fca5a5; font-size: 0.9rem; line-height: 1.7;
+  display: none; margin-top: 12px;
+}
+.explanation-box.visible { display: block; animation: fadeIn 0.3s; }
+.explanation-box strong { color: var(--red); }
+
+.feedback-msg {
+  padding: 10px 16px; border-radius: 10px;
+  font-weight: 600; font-size: 0.9rem;
+  display: none; margin-top: 8px;
+  animation: fadeIn 0.3s;
+}
+.feedback-msg.correct-msg { background: #064e3b; color: #6ee7b7; display: flex; align-items: center; gap: 8px; }
+.feedback-msg.wrong-msg { background: #1a0a0a; color: #fca5a5; display: flex; align-items: center; gap: 8px; }
+
+/* =================== SIDEBAR =================== */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+.stats-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+.stats-card h4 {
+  font-size: 0.85rem; color: var(--text2); margin-bottom: 14px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.stat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-label { color: var(--text2); font-size: 0.88rem; }
+.stat-val { font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent3); }
+
+.endless-card {
+  background: linear-gradient(135deg, #1a0f2e, #0f1a2e);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius); padding: 20px; text-align: center;
+}
+.endless-card h4 { color: var(--accent3); margin-bottom: 8px; font-size: 1rem; }
+.endless-card p { color: var(--text2); font-size: 0.85rem; margin-bottom: 14px; }
+.btn-endless {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white; border: none; border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  font-size: 1rem; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-endless:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.4); }
+
+/* =================== ENDLESS MODE OVERLAY =================== */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+  justify-content: center; align-items: center; padding: 20px;
+}
+.overlay.active { display: flex; }
+.endless-box {
+  background: var(--card); border: 1px solid var(--accent);
+  border-radius: 20px; padding: 32px; width: 100%; max-width: 560px;
+  max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 0 60px rgba(124,58,237,0.3);
+}
+.endless-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.endless-title {
+  font-family: 'Syne', sans-serif; font-size: 1.3rem;
+  background: linear-gradient(135deg, var(--accent2), var(--accent3));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.lives { display: flex; gap: 6px; font-size: 1.3rem; }
+.endless-score-display {
+  text-align: center; margin-bottom: 20px;
+}
+.endless-score-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 2.5rem;
+  font-weight: 700; color: var(--accent3);
+}
+.endless-score-label { color: var(--text2); font-size: 0.85rem; }
+
+/* Timer bar */
+.timer-bar-wrap {
+  background: var(--bg3); border-radius: 999px; height: 10px;
+  margin-bottom: 8px; overflow: hidden;
+}
+.timer-bar {
+  height: 100%; border-radius: 999px; width: 100%;
+  background: linear-gradient(90deg, var(--green), var(--accent2));
+  transition: width 0.1s linear, background 0.5s;
+}
+.timer-bar.warning { background: linear-gradient(90deg, var(--red), var(--yellow)); }
+.timer-text {
+  text-align: right; font-size: 0.8rem; color: var(--text2);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 16px;
+}
+
+.endless-q-text {
+  font-size: 1rem; color: var(--text); margin-bottom: 18px;
+  line-height: 1.8; min-height: 60px;
+}
+.endless-answer-area { display: flex; gap: 10px; }
+.endless-answer-area .answer-input { flex: 1; }
+.btn-endless-submit {
+  padding: 12px 20px; background: var(--accent); color: white;
+  border: none; border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+}
+.btn-endless-submit:hover { background: var(--accent2); }
+
+.endless-feedback {
+  margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+  font-size: 0.88rem; font-weight: 600; display: none;
+}
+.endless-feedback.show { display: block; animation: fadeIn 0.2s; }
+.endless-feedback.ok { background: #064e3b; color: #6ee7b7; }
+.endless-feedback.no { background: #1a0a0a; color: #fca5a5; }
+
+/* Game Over */
+.gameover-box { text-align: center; }
+.gameover-icon { font-size: 3rem; margin-bottom: 16px; }
+.gameover-title {
+  font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 8px;
+  color: var(--accent3);
+}
+.gameover-score {
+  font-family: 'JetBrains Mono', monospace; font-size: 3rem;
+  font-weight: 700; color: var(--accent2); margin: 12px 0;
+}
+.name-input {
+  width: 100%; padding: 12px 16px; margin: 12px 0;
+  background: var(--bg3); border: 2px solid var(--border);
+  color: var(--text); border-radius: 10px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+  outline: none; text-align: center;
+}
+.name-input:focus { border-color: var(--accent2); }
+
+/* =================== LEADERBOARD =================== */
+.lb-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  max-width: 720px; margin: 0 auto;
+}
+.lb-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.lb-title {
+  font-family: 'Syne', sans-serif; font-size: 1.4rem; color: var(--accent3);
+  display: flex; align-items: center; gap: 10px;
+}
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th {
+  text-align: left; padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+}
+.lb-table td {
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  font-size: 0.93rem;
+}
+.lb-table tr:last-child td { border-bottom: none; }
+.lb-table tr:hover td { background: var(--bg3); }
+.rank-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  font-weight: 700; font-size: 0.85rem;
+}
+.rank-1 { background: #f59e0b; color: #1a1a00; }
+.rank-2 { background: #9ca3af; color: #111; }
+.rank-3 { background: #d97706; color: #1a0a00; }
+.rank-n { background: var(--bg3); color: var(--text2); }
+.lb-empty {
+  text-align: center; padding: 40px 20px;
+  color: var(--text2); font-size: 0.95rem; line-height: 2;
+}
+.lb-setup-hint {
+  background: var(--bg3); border: 1px dashed var(--border);
+  border-radius: 10px; padding: 16px; margin-top: 16px;
+  font-size: 0.85rem; color: var(--text2);
+}
+.lb-setup-hint code {
+  background: var(--card2); padding: 2px 8px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+  color: var(--accent3);
+}
+
+/* URL Setup Modal */
+.setup-box {
+  background: var(--card); border: 1px solid var(--accent);
+  border-radius: 16px; padding: 28px; max-width: 480px; width: 100%;
+}
+.setup-box h3 { color: var(--accent3); margin-bottom: 14px; }
+.setup-box p { color: var(--text2); font-size: 0.9rem; margin-bottom: 14px; }
+.url-input {
+  width: 100%; padding: 12px 16px;
+  background: var(--bg3); border: 2px solid var(--border);
+  color: var(--text); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  outline: none; margin-bottom: 14px;
+}
+.url-input:focus { border-color: var(--accent2); }
+
+/* =================== ANIMATIONS =================== */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+  50% { box-shadow: 0 0 0 8px rgba(16,185,129,0.3); }
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.3s ease; }
+
+/* =================== CONFETTI PARTICLE =================== */
+.confetti-piece {
+  position: fixed; width: 8px; height: 8px; border-radius: 2px;
+  pointer-events: none; z-index: 999;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* =================== RESPONSIVE =================== */
+@media (max-width: 700px) {
+  .materi-grid { grid-template-columns: 1fr; }
+  .answer-area { flex-direction: column; }
+  .btn-row { flex-direction: column; }
+  .btn-row .btn { width: 100%; justify-content: center; }
+  header { padding: 12px 16px; }
+  .logo span { display: none; }
+  .endless-box { padding: 20px; }
+}
+
+/* =================== URL CONFIG STRIP =================== */
+.config-strip {
+  background: var(--bg3); border-bottom: 1px solid var(--border);
+  padding: 8px 24px; font-size: 0.8rem; color: var(--text2);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.config-strip a { color: var(--accent3); cursor: pointer; text-decoration: underline; }
+.config-connected { color: var(--green) !important; }
+
+/* =================== MISC =================== */
+.section-title {
+  font-family: 'Syne', sans-serif; font-size: 1.6rem;
+  margin-bottom: 20px; color: var(--text);
+  display: flex; align-items: center; gap: 12px;
+}
+.section-title span { color: var(--accent3); }
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- CONFIG STRIP -->
+<div class="config-strip" id="configStrip">
+  <i class="fa fa-link"></i>
+  <span id="configStatus">Leaderboard belum terhubung.</span>
+  <a onclick="openSetup()">⚙️ Hubungkan Google Sheets</a>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <i class="fa-solid fa-table-cells"></i>
+    <span>MatriksKu</span>
+  </div>
+  <div class="header-right">
+    <div class="score-badge">
+      <i class="fa fa-star"></i>
+      <span id="headerScore">0</span> pts
+    </div>
+    <div class="toggle-wrap">
+      <label>🌞</label>
+      <label class="switch">
+        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+        <span class="slider"></span>
+      </label>
+      <label>🌙</label>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main-container">
+  <!-- NAV TABS -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showSection('materi')"><i class="fa fa-book-open"></i> Materi</button>
+    <button class="tab-btn" onclick="showSection('latihan')"><i class="fa fa-dumbbell"></i> Latihan</button>
+    <button class="tab-btn" onclick="showSection('leaderboard')"><i class="fa fa-trophy"></i> Leaderboard</button>
+  </div>
+
+  <!-- =================== MATERI =================== -->
+  <div class="section active" id="sec-materi">
+    <div class="section-title"><i class="fa fa-book-open" style="color:var(--accent2)"></i> Materi Matriks <span>Dasar</span></div>
+    <div class="materi-grid">
+
+      <!-- 1. Pengertian -->
+      <div class="materi-card">
+        <h3><i class="fa fa-info-circle"></i> 1. Pengertian & Struktur</h3>
+        <p><strong style="color:var(--text)">Matriks</strong> adalah susunan bilangan berbentuk persegi panjang yang diatur dalam <em>baris</em> dan <em>kolom</em>, diapit tanda kurung.</p>
+        <p>Matriks berordo <strong style="color:var(--accent3)">m × n</strong> berarti memiliki <em>m</em> baris dan <em>n</em> kolom.</p>
+        <p>Elemen a<sub>ij</sub> = elemen baris ke-<em>i</em>, kolom ke-<em>j</em>.</p>
+        <div class="matrix-visual">
+          <div class="matrix-row"><span class="matrix-cell highlight">a₁₁</span><span class="matrix-cell">a₁₂</span><span class="matrix-cell">a₁₃</span></div>
+          <div class="matrix-row"><span class="matrix-cell">a₂₁</span><span class="matrix-cell highlight">a₂₂</span><span class="matrix-cell">a₂₃</span></div>
+          <div class="matrix-row"><span class="matrix-cell">a₃₁</span><span class="matrix-cell">a₃₂</span><span class="matrix-cell highlight">a₃₃</span></div>
+        </div>
+        <p>Contoh matriks 2×3: <span style="color:var(--text2)">2 baris, 3 kolom → 6 elemen</span></p>
+        <div class="matrix-visual">
+          <div class="matrix-row"><span class="matrix-cell">1</span><span class="matrix-cell">4</span><span class="matrix-cell highlight">7</span></div>
+          <div class="matrix-row"><span class="matrix-cell">2</span><span class="matrix-cell">5</span><span class="matrix-cell">8</span></div>
+        </div>
+        <p style="font-size:0.83rem;color:var(--text2)">a<sub>13</sub> = <span style="color:var(--accent3)">7</span> (baris 1, kolom 3)</p>
+      </div>
+
+      <!-- 2. Jenis Matriks -->
+      <div class="materi-card">
+        <h3><i class="fa fa-shapes"></i> 2. Jenis-Jenis Matriks</h3>
+        <ul>
+          <li><span class="tag-jenis">Persegi</span> Baris = Kolom (n×n)</li>
+          <li><span class="tag-jenis">Baris</span> Hanya 1 baris (1×n)</li>
+          <li><span class="tag-jenis">Kolom</span> Hanya 1 kolom (m×1)</li>
+          <li><span class="tag-jenis">Nol</span> Semua elemen = 0</li>
+          <li><span class="tag-jenis">Identitas</span> Diagonal = 1, lainnya = 0</li>
+        </ul>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+          <div>
+            <p style="font-size:0.78rem;color:var(--text2);text-align:center">Identitas I₂</p>
+            <div class="matrix-visual">
+              <div class="matrix-row"><span class="matrix-cell highlight">1</span><span class="matrix-cell">0</span></div>
+              <div class="matrix-row"><span class="matrix-cell">0</span><span class="matrix-cell highlight">1</span></div>
+            </div>
+          </div>
+          <div>
+            <p style="font-size:0.78rem;color:var(--text2);text-align:center">Nol 2×2</p>
+            <div class="matrix-visual">
+              <div class="matrix-row"><span class="matrix-cell">0</span><span class="matrix-cell">0</span></div>
+              <div class="matrix-row"><span class="matrix-cell">0</span><span class="matrix-cell">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Operasi -->
+      <div class="materi-card">
+        <h3><i class="fa fa-calculator"></i> 3. Operasi Dasar Matriks</h3>
+        <p><strong style="color:var(--text)">Penjumlahan/Pengurangan:</strong> Ordo harus sama, jumlahkan elemen yang bersesuaian.</p>
+        <div class="formula-box">
+          [1  2]   [3  0]   [4  2]<br>
+          [3  4] + [1  2] = [4  6]
+        </div>
+        <p><strong style="color:var(--text)">Perkalian Skalar:</strong> Kalikan semua elemen dengan bilangan k.</p>
+        <div class="formula-box">
+          2 × [1  3] = [2  6]<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[2  4]   [4  8]
+        </div>
+        <p><strong style="color:var(--text)">Perkalian Matriks (A×B):</strong> Kolom A = Baris B</p>
+        <div class="formula-box">
+          [1 2] × [5 6] = [1·5+2·7  1·6+2·8]<br>
+          [3 4]   [7 8]   [3·5+4·7  3·6+4·8]<br>
+                        = [19  22]<br>
+                          [43  50]
+        </div>
+      </div>
+
+      <!-- 4. Transpose -->
+      <div class="materi-card">
+        <h3><i class="fa fa-rotate"></i> 4. Transpose Matriks</h3>
+        <p>Transpose A (ditulis <strong style="color:var(--accent3)">Aᵀ</strong>) diperoleh dengan <em>menukar baris menjadi kolom</em>.</p>
+        <p>Jika A berordo m×n, maka Aᵀ berordo <strong style="color:var(--accent3)">n×m</strong>.</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
+          <div>
+            <p style="font-size:0.78rem;color:var(--text2);text-align:center">A (2×3)</p>
+            <div class="matrix-visual">
+              <div class="matrix-row"><span class="matrix-cell highlight">1</span><span class="matrix-cell">2</span><span class="matrix-cell">3</span></div>
+              <div class="matrix-row"><span class="matrix-cell">4</span><span class="matrix-cell">5</span><span class="matrix-cell">6</span></div>
+            </div>
+          </div>
+          <div style="color:var(--accent3);font-size:1.5rem">→</div>
+          <div>
+            <p style="font-size:0.78rem;color:var(--text2);text-align:center">Aᵀ (3×2)</p>
+            <div class="matrix-visual">
+              <div class="matrix-row"><span class="matrix-cell highlight">1</span><span class="matrix-cell">4</span></div>
+              <div class="matrix-row"><span class="matrix-cell">2</span><span class="matrix-cell">5</span></div>
+              <div class="matrix-row"><span class="matrix-cell">3</span><span class="matrix-cell">6</span></div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:10px">Sifat: (Aᵀ)ᵀ = A &nbsp;|&nbsp; (A+B)ᵀ = Aᵀ+Bᵀ</p>
+      </div>
+
+      <!-- 5. Determinan & Invers -->
+      <div class="materi-card" style="grid-column: span 1;">
+        <h3><i class="fa fa-superscript"></i> 5. Determinan & Invers (2×2)</h3>
+        <p>Untuk matriks A = [[a,b],[c,d]]:</p>
+        <div class="formula-box">
+          det(A) = |A| = <span style="color:var(--accent3)">ad − bc</span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div>
+            <p style="font-size:0.83rem;color:var(--text2)">Contoh: det([[2,3],[1,4]])</p>
+            <div class="formula-box">
+              = 2×4 − 3×1 = 8 − 3 = <span style="color:var(--green)">5</span>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:8px"><strong style="color:var(--text)">Invers A⁻¹</strong> (syarat: det ≠ 0):</p>
+        <div class="formula-box">
+          A⁻¹ = 1/det(A) × [  d  -b]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[-c   a]
+        </div>
+        <p style="font-size:0.83rem;color:var(--text2)">Jika det(A) = 0 → matriks <span style="color:var(--red)">singular</span>, tidak punya invers.</p>
+      </div>
+
+    </div><!-- end materi-grid -->
+  </div>
+
+  <!-- =================== LATIHAN =================== -->
+  <div class="section" id="sec-latihan">
+    <div class="game-layout">
+      <!-- QUESTION PANEL -->
+      <div>
+        <div class="question-card" id="questionCard">
+          <div class="question-header">
+            <span class="question-tag" id="qTag">—</span>
+            <button class="btn btn-secondary" onclick="skipQuestion()"><i class="fa fa-forward-step"></i> Skip (-5)</button>
+          </div>
+          <div class="question-text" id="qText">Klik "Soal Baru" untuk mulai latihan!</div>
+          <div class="answer-area">
+            <input class="answer-input" id="answerInput" placeholder="Jawaban kamu..." autocomplete="off" onkeydown="if(event.key==='Enter') checkAnswer()">
+            <button class="btn btn-primary" onclick="checkAnswer()"><i class="fa fa-check"></i> Cek</button>
+          </div>
+          <div class="feedback-msg" id="feedbackMsg"></div>
+          <div class="explanation-box" id="explanationBox"></div>
+          <div class="btn-row" style="margin-top:16px">
+            <button class="btn btn-success" onclick="loadQuestion()"><i class="fa fa-dice"></i> Soal Baru</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="stats-card">
+          <h4><i class="fa fa-chart-bar"></i> Statistik Latihan</h4>
+          <div class="stat-row"><span class="stat-label">Skor</span><span class="stat-val" id="statScore">0</span></div>
+          <div class="stat-row"><span class="stat-label">Benar</span><span class="stat-val" id="statCorrect" style="color:var(--green)">0</span></div>
+          <div class="stat-row"><span class="stat-label">Salah</span><span class="stat-val" id="statWrong" style="color:var(--red)">0</span></div>
+          <div class="stat-row"><span class="stat-label">Di-skip</span><span class="stat-val" id="statSkip" style="color:var(--yellow)">0</span></div>
+        </div>
+        <div class="endless-card">
+          <h4>🎮 Endless Mode</h4>
+          <p>Timer 20 detik, 3 nyawa, bersaing di leaderboard global!</p>
+          <button class="btn-endless" onclick="startEndless()">
+            <i class="fa fa-gamepad"></i> Mulai Endless Mode
+          </button>
+        </div>
+        <div class="stats-card">
+          <h4><i class="fa fa-lightbulb"></i> Tips</h4>
+          <p style="color:var(--text2);font-size:0.85rem">• Tulis angka desimal dengan titik, contoh: <code style="background:var(--bg3);padding:1px 6px;border-radius:4px;font-family:monospace">3.5</code></p>
+          <p style="color:var(--text2);font-size:0.85rem">• Jawab matriks dalam format: <code style="background:var(--bg3);padding:1px 6px;border-radius:4px;font-family:monospace">a b / c d</code></p>
+          <p style="color:var(--text2);font-size:0.85rem">• Gunakan Skip jika soal terlalu sulit!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== LEADERBOARD =================== -->
+  <div class="section" id="sec-leaderboard">
+    <div class="lb-card">
+      <div class="lb-header">
+        <div class="lb-title"><i class="fa fa-trophy" style="color:var(--yellow)"></i> Leaderboard Global</div>
+        <button class="btn btn-secondary" onclick="loadLeaderboard()"><i class="fa fa-rotate"></i> Refresh</button>
+      </div>
+      <div id="lbContent">
+        <div class="lb-empty">
+          <div style="font-size:2.5rem;margin-bottom:12px">📊</div>
+          <div>Leaderboard belum terhubung ke Google Sheets.</div>
+          <div style="margin-top:6px">Klik <strong style="color:var(--accent3)">⚙️ Hubungkan Google Sheets</strong> di atas untuk setup.</div>
+          <div class="lb-setup-hint" style="margin-top:16px;text-align:left">
+            <strong>Cara cepat setup:</strong><br>
+            1. Buka komentar di bagian atas file HTML ini untuk panduan lengkap<br>
+            2. Deploy Google Apps Script → dapatkan URL<br>
+            3. Klik ⚙️ di strip atas → paste URL → Simpan<br>
+            4. Leaderboard langsung aktif! 🎉
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main-container -->
+
+<!-- =================== ENDLESS MODE OVERLAY =================== -->
+<div class="overlay" id="endlessOverlay">
+  <div class="endless-box" id="endlessBox">
+
+    <!-- PLAYING STATE -->
+    <div id="endlessPlaying">
+      <div class="endless-header">
+        <div class="endless-title"><i class="fa fa-gamepad"></i> Endless Mode</div>
+        <div class="lives" id="livesDisplay">❤️❤️❤️</div>
+      </div>
+      <div class="endless-score-display">
+        <div class="endless-score-num" id="endlessScoreNum">0</div>
+        <div class="endless-score-label">poin · soal <span id="endlessQNum">1</span></div>
+      </div>
+      <div class="timer-bar-wrap">
+        <div class="timer-bar" id="timerBar"></div>
+      </div>
+      <div class="timer-text"><span id="timerSec">20</span>s tersisa</div>
+      <div class="endless-q-text" id="endlessQText">Memuat soal...</div>
+      <div class="endless-answer-area">
+        <input class="answer-input" id="endlessInput" placeholder="Jawaban..." autocomplete="off" onkeydown="if(event.key==='Enter') endlessCheck()">
+        <button class="btn-endless-submit" onclick="endlessCheck()"><i class="fa fa-check"></i></button>
+      </div>
+      <div class="endless-feedback" id="endlessFeedback"></div>
+      <div style="margin-top:16px;text-align:center">
+        <button class="btn btn-danger" onclick="endlessQuit()" style="margin:auto"><i class="fa fa-xmark"></i> Keluar</button>
+      </div>
+    </div>
+
+    <!-- GAME OVER STATE -->
+    <div id="endlessGameOver" style="display:none">
+      <div class="gameover-box">
+        <div class="gameover-icon">💀</div>
+        <div class="gameover-title">Game Over!</div>
+        <div style="color:var(--text2);margin-bottom:8px">Skor akhirmu:</div>
+        <div class="gameover-score" id="finalScore">0</div>
+        <p style="color:var(--text2);margin-bottom:14px">Masukkan namamu untuk leaderboard global:</p>
+        <input class="name-input" id="playerName" placeholder="Nama kamu..." maxlength="20">
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:8px">
+          <button class="btn btn-primary" onclick="submitScore()"><i class="fa fa-paper-plane"></i> Kirim Skor</button>
+          <button class="btn btn-secondary" onclick="closeEndless()"><i class="fa fa-xmark"></i> Tutup</button>
+        </div>
+        <div id="submitMsg" style="margin-top:12px;font-size:0.85rem;color:var(--text2)"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SETUP OVERLAY -->
+<div class="overlay" id="setupOverlay">
+  <div class="setup-box">
+    <h3><i class="fa fa-gear"></i> Hubungkan Google Sheets</h3>
+    <p>Paste URL Google Apps Script kamu di sini. Lihat panduan lengkap di komentar HTML.</p>
+    <input class="url-input" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/...">
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="saveAppsScriptUrl()"><i class="fa fa-save"></i> Simpan & Hubungkan</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('setupOverlay').classList.remove('active')"><i class="fa fa-xmark"></i> Batal</button>
+    </div>
+    <p style="margin-top:12px;font-size:0.82rem;color:var(--text2)">Belum punya URL? Buka komentar di bagian atas file HTML ini untuk panduan lengkap setup Google Apps Script.</p>
+  </div>
+</div>
+
+<!-- =================== JAVASCRIPT =================== -->
+<script>
+/* ============================================================
+   SOAL BANK (25+ soal)
+   ============================================================ */
+const SOAL = [
+  // --- PENGERTIAN & STRUKTUR ---
+  { topik:"Struktur", text:"Matriks A berordo 3×4. Berapa total elemen matriks tersebut?", answer:"12", explanation:"Ordo m×n berarti m baris × n kolom. Jadi 3×4 = 12 elemen." },
+  { topik:"Struktur", text:"Pada matriks [[2,5,7],[1,3,9]], elemen a₁₃ adalah?", answer:"7", explanation:"a₁₃ berarti baris ke-1, kolom ke-3 → elemen = 7." },
+  { topik:"Struktur", text:"Matriks [[4,1],[0,6],[2,3]] berordo berapa?", answer:"3x2", explanation:"Ada 3 baris dan 2 kolom, jadi ordo = 3×2." },
+  { topik:"Struktur", text:"Elemen a₂₂ dari matriks [[1,2],[3,4],[5,6]] adalah?", answer:"4", explanation:"Baris ke-2, kolom ke-2 → elemen = 4." },
+  { topik:"Struktur", text:"Matriks berordo 1×5 disebut matriks apa?", answer:"baris", explanation:"Matriks dengan hanya 1 baris disebut matriks baris." },
+  // --- JENIS MATRIKS ---
+  { topik:"Jenis", text:"Matriks yang semua elemennya nol disebut matriks apa?", answer:"nol", explanation:"Matriks dengan semua elemen = 0 disebut matriks nol." },
+  { topik:"Jenis", text:"Pada matriks identitas I₃, elemen diagonal utamanya adalah?", answer:"1", explanation:"Matriks identitas memiliki semua elemen diagonal = 1, sisanya = 0." },
+  { topik:"Jenis", text:"Matriks persegi berordo n×n. Jika n=4, berapa total elemen?", answer:"16", explanation:"4×4 = 16 elemen." },
+  { topik:"Jenis", text:"Matriks [[5],[2],[8]] berordo berapa? (format: mxn)", answer:"3x1", explanation:"Ada 3 baris, 1 kolom → ini matriks kolom berordo 3×1." },
+  // --- OPERASI PENJUMLAHAN ---
+  { topik:"Operasi", text:"Jika A=[[1,2],[3,4]] dan B=[[5,6],[7,8]], hitung A+B. Elemen baris 1 kolom 1?", answer:"6", explanation:"(A+B)₁₁ = 1+5 = 6." },
+  { topik:"Operasi", text:"Jika A=[[3,1],[0,2]] dan B=[[1,4],[5,3]], hitung A−B. Elemen baris 2 kolom 1?", answer:"-5", explanation:"(A−B)₂₁ = 0−5 = -5." },
+  { topik:"Operasi", text:"Hitung A+B dimana A=[[2,0],[1,3]] dan B=[[4,1],[2,0]]. Elemen baris 2 kolom 2?", answer:"3", explanation:"(A+B)₂₂ = 3+0 = 3." },
+  { topik:"Operasi", text:"Jika A=[[6,4],[2,8]] dan B=[[1,1],[1,1]], elemen baris 1 kolom 2 dari A−B?", answer:"3", explanation:"(A−B)₁₂ = 4−1 = 3." },
+  // --- PERKALIAN SKALAR ---
+  { topik:"Operasi", text:"Hitung 3 × [[2,4],[1,5]]. Elemen baris 1 kolom 2?", answer:"12", explanation:"3 × 4 = 12." },
+  { topik:"Operasi", text:"Hitung 2 × [[3,1],[0,6]]. Elemen baris 2 kolom 2?", answer:"12", explanation:"2 × 6 = 12." },
+  { topik:"Operasi", text:"Hitung 5 × [[1,0],[0,1]]. Elemen diagonal?", answer:"5", explanation:"5 × 1 = 5 pada elemen diagonal." },
+  // --- PERKALIAN MATRIKS ---
+  { topik:"Operasi", text:"A=[[1,2],[3,4]], B=[[1,0],[0,1]]. Hitung A×B. Elemen baris 1 kolom 1?", answer:"1", explanation:"A × I = A, jadi elemen (1,1) = 1." },
+  { topik:"Operasi", text:"Hitung [[1,2],[3,4]] × [[5],[6]]. Elemen baris 1?", answer:"17", explanation:"1×5 + 2×6 = 5+12 = 17." },
+  { topik:"Operasi", text:"Hitung [[2,0],[0,3]] × [[1,4],[2,5]]. Elemen baris 1 kolom 2?", answer:"8", explanation:"2×4 + 0×5 = 8+0 = 8." },
+  // --- TRANSPOSE ---
+  { topik:"Transpose", text:"Jika A=[[1,2,3],[4,5,6]], berapa ordo Aᵀ? (format: mxn)", answer:"3x2", explanation:"A berordo 2×3, maka Aᵀ berordo 3×2." },
+  { topik:"Transpose", text:"A=[[1,4],[2,5],[3,6]], elemen (Aᵀ)₁₂?", answer:"2", explanation:"Aᵀ baris ke-1 kolom ke-2 = elemen A baris ke-2 kolom ke-1 = 2." },
+  { topik:"Transpose", text:"A=[[7,3],[1,9]], hitung Aᵀ. Elemen baris 2 kolom 1?", answer:"3", explanation:"(Aᵀ)₂₁ = A₁₂ = 3." },
+  // --- DETERMINAN ---
+  { topik:"Determinan", text:"Hitung det([[3,1],[2,4]]).", answer:"10", explanation:"det = 3×4 − 1×2 = 12 − 2 = 10." },
+  { topik:"Determinan", text:"Hitung det([[5,2],[3,4]]).", answer:"14", explanation:"det = 5×4 − 2×3 = 20 − 6 = 14." },
+  { topik:"Determinan", text:"Hitung det([[6,0],[0,3]]).", answer:"18", explanation:"det = 6×3 − 0×0 = 18." },
+  { topik:"Determinan", text:"Jika det(A) = 0, matriks A disebut apa?", answer:"singular", explanation:"Matriks dengan determinan = 0 disebut matriks singular dan tidak memiliki invers." },
+  { topik:"Determinan", text:"Hitung det([[2,5],[1,3]]).", answer:"1", explanation:"det = 2×3 − 5×1 = 6 − 5 = 1." },
+  { topik:"Determinan", text:"Hitung det([[4,2],[6,3]]).", answer:"0", explanation:"det = 4×3 − 2×6 = 12 − 12 = 0 → matriks singular." },
+  { topik:"Determinan", text:"Matriks A=[[a,b],[c,d]], rumus determinannya adalah?", answer:"ad-bc", explanation:"Rumus determinan 2×2: det(A) = ad − bc." },
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let score = 0, correct = 0, wrong = 0, skipped = 0;
+let currentQ = null, prevQIdx = -1;
+let endlessLives = 3, endlessScore = 0, endlessQCount = 0;
+let endlessTimer = null, endlessTimeLeft = 20;
+let APPS_SCRIPT_URL = localStorage.getItem('appsScriptUrl') || '';
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.onload = () => {
+  // Theme
+  const saved = localStorage.getItem('theme') || 'dark';
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme','light');
+    document.getElementById('themeToggle').checked = true;
+  }
+  // Score
+  score = parseInt(localStorage.getItem('latihanScore')) || 0;
+  correct = parseInt(localStorage.getItem('latihanCorrect')) || 0;
+  wrong = parseInt(localStorage.getItem('latihanWrong')) || 0;
+  skipped = parseInt(localStorage.getItem('latihanSkip')) || 0;
+  updateStats();
+  // URL status
+  updateConfigStrip();
+};
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function toggleTheme() {
+  const isLight = document.getElementById('themeToggle').checked;
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'leaderboard') loadLeaderboard();
+}
+
+/* ============================================================
+   LATIHAN
+   ============================================================ */
+function loadQuestion() {
+  let idx;
+  do { idx = Math.floor(Math.random() * SOAL.length); } while (idx === prevQIdx);
+  prevQIdx = idx;
+  currentQ = SOAL[idx];
+  document.getElementById('qTag').textContent = currentQ.topik;
+  document.getElementById('qText').innerHTML = currentQ.text;
+  document.getElementById('answerInput').value = '';
+  document.getElementById('answerInput').className = 'answer-input';
+  document.getElementById('feedbackMsg').className = 'feedback-msg';
+  document.getElementById('feedbackMsg').innerHTML = '';
+  document.getElementById('explanationBox').className = 'explanation-box';
+  document.getElementById('explanationBox').innerHTML = '';
+  document.getElementById('answerInput').focus();
+}
+
+function checkAnswer() {
+  if (!currentQ) { loadQuestion(); return; }
+  const raw = document.getElementById('answerInput').value.trim().toLowerCase().replace(/\s/g,'');
+  const ans = currentQ.answer.toLowerCase().replace(/\s/g,'');
+  if (!raw) return;
+  if (raw === ans || raw === ans.replace('×','x') || raw === ans.replace('x','×')) {
+    // CORRECT
+    score += 10; correct++;
+    saveStats();
+    updateStats();
+    document.getElementById('answerInput').classList.add('correct');
+    showFeedback(true);
+    spawnConfetti();
+    setTimeout(loadQuestion, 1400);
+  } else {
+    // WRONG
+    score = Math.max(0, score - 0); wrong++;
+    saveStats(); updateStats();
+    document.getElementById('answerInput').classList.add('wrong');
+    showFeedback(false);
+    showExplanation();
+  }
+}
+
+function showFeedback(ok) {
+  const el = document.getElementById('feedbackMsg');
+  if (ok) {
+    el.className = 'feedback-msg correct-msg';
+    el.innerHTML = '<i class="fa fa-circle-check"></i> Benar! +10 poin 🎉';
+  } else {
+    el.className = 'feedback-msg wrong-msg';
+    el.innerHTML = '<i class="fa fa-circle-xmark"></i> Salah. Lihat penjelasan di bawah.';
+  }
+}
+
+function showExplanation() {
+  const el = document.getElementById('explanationBox');
+  el.className = 'explanation-box visible';
+  el.innerHTML = `<strong><i class="fa fa-lightbulb"></i> Pembahasan:</strong><br>${currentQ.explanation}<br><br><em>Jawaban: <strong style="color:var(--accent3)">${currentQ.answer}</strong></em>`;
+}
+
+function skipQuestion() {
+  score = Math.max(0, score - 5); skipped++;
+  saveStats(); updateStats();
+  loadQuestion();
+}
+
+function updateStats() {
+  document.getElementById('headerScore').textContent = score;
+  document.getElementById('statScore').textContent = score;
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('statSkip').textContent = skipped;
+}
+
+function saveStats() {
+  localStorage.setItem('latihanScore', score);
+  localStorage.setItem('latihanCorrect', correct);
+  localStorage.setItem('latihanWrong', wrong);
+  localStorage.setItem('latihanSkip', skipped);
+}
+
+/* ============================================================
+   ENDLESS MODE
+   ============================================================ */
+function startEndless() {
+  endlessLives = 3; endlessScore = 0; endlessQCount = 0;
+  document.getElementById('endlessPlaying').style.display = 'block';
+  document.getElementById('endlessGameOver').style.display = 'none';
+  document.getElementById('endlessOverlay').classList.add('active');
+  updateLives();
+  endlessNewQ();
+}
+
+function endlessNewQ() {
+  endlessQCount++;
+  let idx;
+  do { idx = Math.floor(Math.random() * SOAL.length); } while (idx === prevQIdx);
+  prevQIdx = idx;
+  currentQ = SOAL[idx];
+  document.getElementById('endlessQText').textContent = currentQ.text;
+  document.getElementById('endlessInput').value = '';
+  document.getElementById('endlessQNum').textContent = endlessQCount;
+  document.getElementById('endlessScoreNum').textContent = endlessScore;
+  document.getElementById('endlessFeedback').className = 'endless-feedback';
+  document.getElementById('endlessFeedback').textContent = '';
+  document.getElementById('endlessInput').focus();
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(endlessTimer);
+  endlessTimeLeft = 20;
+  updateTimerBar();
+  endlessTimer = setInterval(() => {
+    endlessTimeLeft--;
+    updateTimerBar();
+    if (endlessTimeLeft <= 0) {
+      clearInterval(endlessTimer);
+      endlessWrong('⏰ Waktu habis! Jawaban: ' + currentQ.answer);
+    }
+  }, 1000);
+}
+
+function updateTimerBar() {
+  const pct = (endlessTimeLeft / 20) * 100;
+  const bar = document.getElementById('timerBar');
+  bar.style.width = pct + '%';
+  bar.className = 'timer-bar' + (endlessTimeLeft <= 7 ? ' warning' : '');
+  document.getElementById('timerSec').textContent = endlessTimeLeft;
+}
+
+function endlessCheck() {
+  clearInterval(endlessTimer);
+  const raw = document.getElementById('endlessInput').value.trim().toLowerCase().replace(/\s/g,'');
+  const ans = currentQ.answer.toLowerCase().replace(/\s/g,'');
+  if (!raw) { startTimer(); return; }
+  if (raw === ans) {
+    endlessScore += 10;
+    const fb = document.getElementById('endlessFeedback');
+    fb.className = 'endless-feedback show ok';
+    fb.textContent = '✅ Benar! +10';
+    document.getElementById('endlessScoreNum').classList.add('pop');
+    setTimeout(() => document.getElementById('endlessScoreNum').classList.remove('pop'), 300);
+    setTimeout(endlessNewQ, 900);
+  } else {
+    endlessWrong('❌ Salah. Jawaban: ' + currentQ.answer);
+  }
+}
+
+function endlessWrong(msg) {
+  endlessLives--;
+  updateLives();
+  const fb = document.getElementById('endlessFeedback');
+  fb.className = 'endless-feedback show no';
+  fb.textContent = msg;
+  if (endlessLives <= 0) {
+    setTimeout(endlessOver, 1200);
+  } else {
+    setTimeout(endlessNewQ, 1500);
+  }
+}
+
+function updateLives() {
+  const hearts = '❤️'.repeat(Math.max(0, endlessLives)) + '🖤'.repeat(Math.max(0, 3 - endlessLives));
+  document.getElementById('livesDisplay').textContent = hearts;
+}
+
+function endlessOver() {
+  clearInterval(endlessTimer);
+  document.getElementById('endlessPlaying').style.display = 'none';
+  document.getElementById('endlessGameOver').style.display = 'block';
+  document.getElementById('finalScore').textContent = endlessScore;
+  document.getElementById('playerName').value = '';
+  document.getElementById('submitMsg').textContent = '';
+}
+
+function endlessQuit() {
+  clearInterval(endlessTimer);
+  if (endlessQCount > 0) endlessOver();
+  else closeEndless();
+}
+
+function closeEndless() {
+  clearInterval(endlessTimer);
+  document.getElementById('endlessOverlay').classList.remove('active');
+}
+
+async function submitScore() {
+  const name = document.getElementById('playerName').value.trim();
+  if (!name) { document.getElementById('submitMsg').textContent = 'Masukkan namamu dulu!'; return; }
+  if (!APPS_SCRIPT_URL) {
+    document.getElementById('submitMsg').innerHTML = 'URL Google Sheets belum diatur. <a onclick="openSetup()" style="color:var(--accent3);cursor:pointer">Klik untuk setup.</a>';
+    return;
+  }
+  document.getElementById('submitMsg').textContent = '⏳ Mengirim skor...';
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nama: name, skor: endlessScore })
+    });
+    document.getElementById('submitMsg').textContent = '✅ Skor terkirim! Cek leaderboard.';
+    setTimeout(closeEndless, 2000);
+  } catch(e) {
+    document.getElementById('submitMsg').textContent = '❌ Gagal kirim. Cek koneksi/URL.';
+  }
+}
+
+/* ============================================================
+   LEADERBOARD
+   ============================================================ */
+async function loadLeaderboard() {
+  const el = document.getElementById('lbContent');
+  if (!APPS_SCRIPT_URL) {
+    el.innerHTML = `<div class="lb-empty">
+      <div style="font-size:2.5rem;margin-bottom:12px">📊</div>
+      <div>Leaderboard belum terhubung ke Google Sheets.</div>
+      <div style="margin-top:6px">Klik <strong style="color:var(--accent3)">⚙️ Hubungkan Google Sheets</strong> di strip atas.</div>
+      <div class="lb-setup-hint" style="margin-top:16px;text-align:left">
+        <strong>Cara setup:</strong><br>
+        1. Buka komentar HTML bagian atas → ikuti panduan<br>
+        2. Deploy Google Apps Script → copy URL<br>
+        3. Klik ⚙️ → paste URL → simpan → refresh!
+      </div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)"><i class="fa fa-spinner fa-spin"></i> Memuat data...</div>';
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=get', { method: 'GET' });
+    const data = await res.json();
+    if (data.status === 'ok' && data.data.length > 0) {
+      renderLeaderboard(data.data);
+    } else {
+      el.innerHTML = '<div class="lb-empty">🏆 Belum ada skor. Jadilah yang pertama!</div>';
+    }
+  } catch(e) {
+    el.innerHTML = `<div class="lb-empty">❌ Gagal memuat leaderboard.<br><small style="color:var(--text2)">Pastikan URL Apps Script benar dan telah di-deploy dengan akses "Anyone".</small></div>`;
+  }
+}
+
+function renderLeaderboard(rows) {
+  const el = document.getElementById('lbContent');
+  let html = `<table class="lb-table"><thead><tr>
+    <th>#</th><th>Nama</th><th>Skor</th><th>Tanggal</th>
+  </tr></thead><tbody>`;
+  rows.forEach((r, i) => {
+    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+    html += `<tr>
+      <td><span class="rank-badge ${rankClass}">${medal || (i+1)}</span></td>
+      <td><strong>${escHtml(r.nama)}</strong></td>
+      <td><span style="font-family:monospace;color:var(--accent3);font-weight:700">${r.skor}</span></td>
+      <td style="color:var(--text2);font-size:0.85rem">${escHtml(r.tanggal || '—')}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ============================================================
+   URL SETUP
+   ============================================================ */
+function openSetup() {
+  document.getElementById('appsScriptUrl').value = APPS_SCRIPT_URL;
+  document.getElementById('setupOverlay').classList.add('active');
+}
+
+function saveAppsScriptUrl() {
+  const url = document.getElementById('appsScriptUrl').value.trim();
+  APPS_SCRIPT_URL = url;
+  localStorage.setItem('appsScriptUrl', url);
+  document.getElementById('setupOverlay').classList.remove('active');
+  updateConfigStrip();
+  loadLeaderboard();
+}
+
+function updateConfigStrip() {
+  const statusEl = document.getElementById('configStatus');
+  if (APPS_SCRIPT_URL) {
+    statusEl.innerHTML = '<span class="config-connected"><i class="fa fa-circle-check"></i> Google Sheets terhubung</span>';
+  } else {
+    statusEl.textContent = 'Leaderboard belum terhubung.';
+  }
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+function spawnConfetti() {
+  const colors = ['#7c3aed','#a855f7','#10b981','#f59e0b','#3b82f6','#ec4899'];
+  for (let i = 0; i < 24; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.cssText = `
+      left:${Math.random()*100}vw;
+      top:-10px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${0.8+Math.random()*1.2}s;
+      animation-delay:${Math.random()*0.3}s;
+      transform:rotate(${Math.random()*360}deg);
+    `;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2500);
+  }
+}
+
+// Close overlays on backdrop click
+document.getElementById('endlessOverlay').addEventListener('click', function(e) {
+  if (e.target === this) endlessQuit();
+});
+document.getElementById('setupOverlay').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('active');
+});
+</script>
+</body>
+</html>
